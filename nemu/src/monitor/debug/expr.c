@@ -281,9 +281,9 @@ bool check_parentheses(int p,int q)
     int i,flag=0;
     for(i=p+1; i<q; i++)
     {
-        if(tokens[p].type==LEFT)
+        if(tokens[i].type==LEFT)
             s[flag++]='(';
-        if(tokens[p].type==RIGHT&&s[flag-1]=='(')
+        if(tokens[i].type==RIGHT&&s[flag-1]=='(')
         {
             flag=flag-1;
         }
