@@ -220,6 +220,7 @@ uint32_t  eval(int p,int q)
     {
 	
         op= find_op(p,q);    /*implement find_op(p,q)*/
+	printf("op is %d the signal is %s",op,tokens[op].str);
         if(tokens[op].type==NEG)
         {
             val2=eval(op+1,q);
