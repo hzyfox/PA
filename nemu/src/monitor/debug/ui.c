@@ -95,6 +95,7 @@ static int cmd_w(char*args)
    temp=new_wp();
    printf("%s",args);
    temp->adress=args;
+  printf("%s",temp->adress);
    temp->value=swaddr_read(addr,4);
 
     return 0;
