@@ -213,13 +213,13 @@ uint32_t  eval(int p,int q)
     }
     else if(check_parentheses(p,q)==true)   /*implement check_parentheses*/
     {
+	printf("()successful");
         return eval(p+1,q-1);
     }
     else
     {
 	
         op= find_op(p,q);    /*implement find_op(p,q)*/
-        printf("op is %d",op);
         if(tokens[op].type==NEG)
         {
             val2=eval(op+1,q);
