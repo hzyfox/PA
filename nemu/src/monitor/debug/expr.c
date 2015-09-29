@@ -324,7 +324,7 @@ uint32_t find_op(int p,int q)
                 jh=jh_;
                 pos=i;
             }
-            if(yxj_==yxj&&jh_==1)
+            if(yxj_==yxj&&jh_==0)
             {
                 pos=i;
             }
