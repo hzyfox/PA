@@ -106,8 +106,9 @@ static int cmd_info(char*args)
 {
     char*arg=strtok(NULL," ");
     if(!strcmp("r",arg))//print reg
-        printf("eax is %d\t ecx is%d\t \nedx is%d\t ebx is %d\t \nesp is%d\t ebp is %d\t \nesi is%d\t edi is %d\n",swaddr_read(cpu.eax,4),swaddr_read(cpu.ecx,4),swaddr_read(cpu.edx,4)
-               ,swaddr_read(cpu.ebx,4),swaddr_read(cpu.esp,4),swaddr_read(cpu.ebp,4),swaddr_read(cpu.esi,4),swaddr_read(cpu.edi,4));
+        printf("eax is %d\t ecx is%d\t \nedx is%d\t ebx is %d\t \nesp is%d\t ebp is %d\t \nesi is%d\t edi is %d\n",cpu.eax,cpu.ecx,cpu.edx,cpu.ebx,cpu.esp,cpu.ebp,
+cpu.esi,cpu.edi);
+              
     else if(!strcmp("w",arg))
     {
         WP *p;
