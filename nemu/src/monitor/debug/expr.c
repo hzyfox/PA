@@ -255,7 +255,7 @@ uint32_t  eval(int p,int q)
         case UEQ:
             return val1!=val2;
         case '!':
-            return ~val2;
+            return !val2;
         case NEG:
             return -val2;
         case DEREF:
