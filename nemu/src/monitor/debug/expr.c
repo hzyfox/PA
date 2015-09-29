@@ -101,8 +101,9 @@ static bool make_token(char *e) {
                 tokens[nr_token].type=rules[i].token_type;
                  while(flag<substr_len){
                     tokens[nr_token].str[flag++]=e[position++];
-		  tokens[nr_token].str[flag]='\0';
+		  
                 }
+		tokens[nr_token].str[flag]='\0';
                
 
 
@@ -122,12 +123,13 @@ static bool make_token(char *e) {
                         tokens[nr_token].type=DEREF;
                 
                 }
+		nr_token++;
 
                 break;
             }
 
         }
-        nr_token++;
+        
         if(nr_token==32)
         {
             Log("the expression is beyond  the length");
