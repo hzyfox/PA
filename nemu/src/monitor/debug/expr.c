@@ -124,7 +124,7 @@ static bool make_token(char *e) {
                 
                 }
 		nr_token++;
-                printf("\n%d",tokens[0].type);
+                
 
                 break;
             }
@@ -144,6 +144,7 @@ static bool make_token(char *e) {
             return false;
         }
     }
+printf("\n%d",tokens[0].type);
 
     return true;
 }
