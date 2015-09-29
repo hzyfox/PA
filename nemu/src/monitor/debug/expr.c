@@ -113,14 +113,18 @@ static bool make_token(char *e) {
                  * types of tokens, some extra actions should be performed.
                  */
 
-                switch(rules[i].token_type)
+                switch(tokens[nr_token].type)
                 {
                 case '-':
-                    if(nr_token==0||tokens[nr_token-1].type!=NO)
+                    if(nr_token==0||tokens[nr_token-1].type!=NO){
                         tokens[nr_token].type=NEG;
+			printf("the type has been changed NEG");
+                          }
                 case '*':
-                    if(nr_token==0||tokens[nr_token-1].type!=NO)
+                    if(nr_token==0||tokens[nr_token-1].type!=NO){
                         tokens[nr_token].type=DEREF;
+			printf("the type has been changed DEREF");
+		}
                 
                 }
 		nr_token++;
@@ -144,7 +148,7 @@ static bool make_token(char *e) {
             return false;
         }
     }
-printf("\n%d",tokens[0].type);
+
 
     return true;
 }
