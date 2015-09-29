@@ -45,6 +45,27 @@ return 0;
 
 }
 
+static int cmd_si(char *args)
+{
+        int num;
+	bool sucess;
+    
+    if(args==NULL)
+    {
+        cpu_exec(1);
+    }
+    else
+    {
+        num=expr(args,&sucess);
+        
+        if(num==0)
+            printf("单步执行命令格式不合法\n");
+        else
+            cpu_exec(num);
+    }
+return 0;
+}
+
 static int cmd_help(char *args);
 
 static struct {
@@ -55,6 +76,7 @@ static struct {
 	{ "help", "Display informations about all supported commands", cmd_help },
 	{ "c", "Continue the execution of the program", cmd_c },
 	{ "q", "Exit NEMU", cmd_q },
+	{ "si","让程序单步执行N条指令后暂停执行，当N没有给出时，缺省为一",cmd_si},
 	{ "p","求出表达式expr的值",cmd_p}
 
 	/* TODO: Add more commands */
