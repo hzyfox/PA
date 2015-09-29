@@ -3,10 +3,14 @@
 
 #include "common.h"
 
+
+
 typedef struct watchpoint {
 	int NO;
-	struct watchpoint *next;
+	int adress;
+	int value;
 
+	struct watchpoint *next;
 	/* TODO: Add more members if necessary */
 
 

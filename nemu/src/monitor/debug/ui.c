@@ -9,6 +9,11 @@
 
 void cpu_exec(uint32_t);
 
+WP* new_wp();
+void free_wp(int num);
+WP* get_head();
+
+
 /* We use the ``readline'' library to provide more flexibility to read from stdin. */
 char* rl_gets() {
 	static char *line_read = NULL;
@@ -76,8 +81,59 @@ static int cmd_x(char *args){
     
     adress=expr(arg1,&success);
     for(i=0;i<num;i++){
-        printf("%x\t",swaddr_read(adress+4*i,4));
+        printf("%x\n",swaddr_read(adress+4*i,4));
     }
+    return 0;
+
+}
+static int cmd_w(char*args)
+{
+   WP*temp;
+   uint32_t addr;
+   bool success;
+   addr=expr(args,&success);//这里的adress的值需要用求值表达式来算
+   temp=new_wp();
+   temp->adress=addr;
+   temp->value=swaddr_read(addr,4);
+
+    return 0;
+
+}
+
+static int cmd_info(char*args)
+{
+    char*arg=strtok(NULL," ");
+    if(!strcmp("r",arg))//print reg
+        printf("eax is %d\t ecx is%d\t edx is%d\t ebx is %d\t esp is%d\t ebp is %d\t esi is%d\t edi is %d\n",swaddr_read(cpu.eax,4),swaddr_read(cpu.ecx,4),swaddr_read(cpu.edx,4)
+               ,swaddr_read(cpu.ebx,4),swaddr_read(cpu.esp,4),swaddr_read(cpu.ebp,4),swaddr_read(cpu.esi,4),swaddr_read(cpu.edi,4));
+    else if(!strcmp("w",arg))
+    {
+        WP *p;
+        p=get_head();
+        while(p!=NULL)
+        {
+            printf("NO is %d\t,adress is %x\t,value is %d\n",p->NO,p->adress,p->value);
+            p=p->next;
+
+        }
+
+    }
+    else
+    {
+        printf("未知命令%s",arg);
+    }
+
+
+    return 0;
+
+}
+
+static int cmd_d(char* args)
+{
+	int num;
+    
+    num=atoi(args);
+    free_wp(num);
     return 0;
 
 }
@@ -95,6 +151,12 @@ static struct {
 	{ "si","让程序单步执行N条指令后暂停执行，当N没有给出时，缺省为一",cmd_si},
 	{ "p","求出表达式expr的值",cmd_p},
 	{ "x","求出表达式EXPR的值，将结果作为起始内存地址，并以16进制的形式输出连续的N个4字节",cmd_x},
+        { "w","当表达式EXPR的值发生变化时，暂停程序的执行,设置监视点",cmd_w},
+	{ "d","删除监视点，删除序号为N的监视点",cmd_d},
+        { "info","打印寄存器状态，打印监视点信息",cmd_info}
+       
+	
+        
 
 	/* TODO: Add more commands */
 
