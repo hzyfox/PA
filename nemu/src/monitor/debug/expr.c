@@ -71,7 +71,8 @@ typedef struct token {
 uint32_t  eval(int p,int q);
 bool check_parentheses(int p,int q);
 uint32_t find_op(int p,int q);
-int judge_yxj(int type,int *yxj,int*jh);
+int judge_yxj(int type,int *yxj,int *pos,int i);
+
 
 Token tokens[32];
 int nr_token;
@@ -294,16 +295,12 @@ bool check_parentheses(int p,int q)
 uint32_t find_op(int p,int q)
 {
     //int fh[32];//运算符
-    int yxj,yxj_; //优先级有七级
-    int jh,jh_;//结合性 0表示左结合，1表示右结合
-    int pos;
+    int yxj=0; //优先级有七级
+    //结合性 0表示左结合，1表示右结合
+    int pos=p;
     int i,j;
-    while(judge_yxj(tokens[p].type,&yxj,&jh)!=1)
-    {
-        p=p+1;
-    }
-    pos=p;
-    for(i=p+1; i<q; i++)
+   
+    for(i=p; i<q; i++)
     {
         if(tokens[i].type==LEFT)
         {
@@ -312,19 +309,8 @@ uint32_t find_op(int p,int q)
                   j++;
             i=j+1;
         }
-        if(judge_yxj(tokens[i].type,&yxj_,&jh_)==1)
-        {
-            if(yxj_<yxj)
-            {
-                yxj=yxj_;
-                jh=jh_;
-                pos=i;
-            }
-            if(yxj_==yxj&&jh_==0)
-            {
-                pos=i;
-            }
-        }
+        judge_yxj(tokens[i].type,&yxj,&pos,i);
+       
 
 
 
@@ -332,42 +318,42 @@ uint32_t find_op(int p,int q)
     return pos;
 
 }
-int judge_yxj(int type,int *yxj,int*jh)
+int judge_yxj(int type,int *yxj,int *pos,int i)
 {
-    if(type==NEG||type=='!'||type==DEREF)
+    if((type==NEG||type=='!'||type==DEREF)&&*yxj>7)
     {
         *yxj=7;
-        *jh=1;
+        *pos=i;
     }
-    else if(type=='*'||type=='/')
+    else if((type=='*'||type=='/')&&*yxj>=6)
     {
         *yxj=6;
-        *jh=0;
+        *pos=i;
     }
-    else if(type=='+'||type=='-')
+    else if((type=='+'||type=='-')&&*yxj>=5)
     {
         *yxj=5;
-        *jh=0;
+        *pos=i;
     }
-    else if(type==EQ||type==UEQ)
+    else if((type==EQ||type==UEQ)&&*yxj>=4)
     {
         *yxj=4;
-        *jh=0;
+        *pos=i;
     }
-    else if(type==AND)
+    else if(type==AND&&*yxj>=3)
     {
         *yxj=3;
-        *jh=0;
+        *pos=i;
     }
-    else if(type==OR)
+    else if(type==OR&&*yxj>=2)
     {
         *yxj=2;
-        *jh=0;
+        *pos=i;
     }
-    else if(type=='=')
+    else if(type=='='&&*yxj>=1)
     {
         *yxj=1;
-        *jh=0;
+        *pos=i;
     }
     else return 0;
 
