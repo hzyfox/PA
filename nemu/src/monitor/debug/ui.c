@@ -77,7 +77,7 @@ static int cmd_x(char *args){
     int i;
     bool success; 
     uint32_t adress;
-    char*arg1=arg+strlen(arg)+1;
+    char*arg1=args+strlen(arg)+1;
     
     adress=expr(arg1,&success);
     for(i=0;i<num;i++){
