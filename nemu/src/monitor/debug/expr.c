@@ -119,13 +119,13 @@ static bool make_token(char *e) {
                 case '-':
                     if(nr_token==0||(tokens[nr_token-1].type!=NO&&tokens[nr_token-1].type!=RIGHT)){
                         tokens[nr_token].type=NEG;
-			printf("\nthe type has been changed NEG");
+			printf("\nthe type has been changed NEG\n");
                           }
 			break;
                 case '*':
                     if(nr_token==0||(tokens[nr_token-1].type!=NO&&tokens[nr_token-1].type!=RIGHT)){
                         tokens[nr_token].type=DEREF;
-			printf("\nthe type has been changed DEREF");
+			printf("\nthe type has been changed DEREF\n");
 		}
                 
                 }
@@ -145,7 +145,7 @@ static bool make_token(char *e) {
 
         if(i == NR_REGEX)
         {
-	    printf("e[%d]=%c\n",position,e[position]);
+	    
             printf("no match at position %d\n%s\n%*.s^\n", position, e, position, "");
             return false;
         }
@@ -163,7 +163,7 @@ uint32_t expr(char *e, bool *success) {
         *success = false;
         return 0;
     }else{
-	printf("\nmake token is successful");
+	
 }
     uint32_t num;
     int p=0,q=nr_token-1;  //nr_token表示分词的个数
@@ -221,7 +221,7 @@ uint32_t  eval(int p,int q)
     {
 	
         op= find_op(p,q);    /*implement find_op(p,q)*/
-	printf("op is %d the signal is %s",op,tokens[op].str);
+	
         if(tokens[op].type==NEG||tokens[op].type==DEREF||tokens[op].type=='!')
         {
             val2=eval(op+1,q);}else{
