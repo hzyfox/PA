@@ -93,10 +93,10 @@ static int cmd_w(char*args)
    bool success;
    addr=expr(args,&success);//这里的adress的值需要用求值表达式来算
    temp=new_wp();
-   printf("%s",args);
+  
    temp->adress=args;
-  printf("%s",temp->adress);
-   temp->value=swaddr_read(addr,4);
+ 
+   temp->value=addr;
 
     return 0;
 
