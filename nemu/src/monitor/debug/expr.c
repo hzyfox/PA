@@ -217,8 +217,9 @@ uint32_t  eval(int p,int q)
     }
     else
     {
-	printf("kuohao pipei unsuccessful\n");
+	
         op= find_op(p,q);    /*implement find_op(p,q)*/
+        printf("op is %d",op);
         if(tokens[op].type==NEG)
         {
             val2=eval(op+1,q);
@@ -262,8 +263,6 @@ uint32_t  eval(int p,int q)
         default:
            printf("不合法的表达式,在switch case语句中");
 		return 0;
-
-
         }
 
 
