@@ -221,14 +221,9 @@ uint32_t  eval(int p,int q)
 	
         op= find_op(p,q);    /*implement find_op(p,q)*/
 	printf("op is %d the signal is %s",op,tokens[op].str);
-        if(tokens[op].type==NEG)
+        if(tokens[op].type==NEG||tokens[op].type==DEREF||tokens[op].type=='!')
         {
-            val2=eval(op+1,q);
-        }else
-        if(tokens[op].type==DEREF)
-           { val2=eval(op+1,q);}else
-        if(tokens[op].type=='!')
-            {val2=eval(op+1,q);}else{
+            val2=eval(op+1,q);}else{
 
         val1=eval(p,op-1);
         val2=eval(op+1,q);}
