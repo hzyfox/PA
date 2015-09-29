@@ -173,8 +173,8 @@ uint32_t  eval(int p,int q)
 {
     
     uint32_t op;
-    uint32_t val1;
-    uint32_t val2;
+    uint32_t val1=0;
+    uint32_t val2=0;
     if(p>q)
     {
         printf("the bad expression\n");
@@ -225,10 +225,10 @@ uint32_t  eval(int p,int q)
         if(tokens[op].type==DEREF)
            { val2=eval(op+1,q);}else
         if(tokens[op].type=='!')
-            {val2=eval(op+1,q);}
+            {val2=eval(op+1,q);}else{
 
         val1=eval(p,op-1);
-        val2=eval(op+1,q);
+        val2=eval(op+1,q);}
 
         switch(tokens[op].type)
         {
@@ -251,7 +251,7 @@ uint32_t  eval(int p,int q)
         case '=':
             return val1=val2;
         case UEQ:
-          
+            return val1!=val2;
         case '!':
             return ~val2;
         case NEG:
