@@ -308,14 +308,14 @@ uint32_t find_op(int p,int q)
         p=p+1;
     }
     pos=p;
-    for(i=p+1; i<=q; i++)
+    for(i=p+1; i<q; i++)
     {
         if(tokens[i].type==LEFT)
         {
             j=i+1;
               while(check_parentheses(i,j)!=true)
                   j++;
-            i=j;
+            i=j+1;
         }
         if(judge_yxj(tokens[i].type,&yxj_,&jh_)==1)
         {
