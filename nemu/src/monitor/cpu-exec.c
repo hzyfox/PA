@@ -2,6 +2,7 @@
 #include "cpu/helper.h"
 #include <setjmp.h>
 #include "monitor/watchpoint.h"
+#include "monitor/expr.h"
 /* The assembly code of instructions executed is only output to the screen
  * when the number of instructions executed is less than this value.
  * This is useful when you use the ``si'' command.
@@ -74,9 +75,10 @@ void cpu_exec(volatile uint32_t n) {
 
 		/* TODO: check watchpoints here. */
 	 	WP*temp=get_head();
+		bool success;
         	for(;temp!=NULL;temp=temp->next){
-                if(temp->value!=swaddr_read(temp->adress,4)){
-                printf("breakpoint %d  %08x:%8d has changed to  %8d",temp->NO,temp->adress,temp->value,swaddr_read(temp->adress,4));
+                if(temp->value!=swaddr_read(expr(temp->adress,&success),4)){
+                printf("breakpoint %d  %s:%8d has changed to  %8d",temp->NO,temp->adress,temp->value,swaddr_read(expr(temp->adress,&success),4));
                 nemu_state=STOP;
               }
 

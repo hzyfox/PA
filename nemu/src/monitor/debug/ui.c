@@ -93,7 +93,7 @@ static int cmd_w(char*args)
    bool success;
    addr=expr(args,&success);//这里的adress的值需要用求值表达式来算
    temp=new_wp();
-   temp->adress=addr;
+   temp->adress=args;
    temp->value=swaddr_read(addr,4);
 
     return 0;
@@ -112,7 +112,7 @@ static int cmd_info(char*args)
         p=get_head();
         while(p!=NULL)
         {
-            printf("NO is %d\t,adress is %x\t,value is %d\n",p->NO,p->adress,p->value);
+            printf("NO is %d\t,adress is %s\t,value is %d\n",p->NO,p->adress,p->value);
             p=p->next;
 
         }

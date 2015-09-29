@@ -7,7 +7,7 @@
 
 typedef struct watchpoint {
 	int NO;
-	int adress;
+	char*adress;//要监视的expression
 	int value;
 
 	struct watchpoint *next;
