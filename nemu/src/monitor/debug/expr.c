@@ -167,14 +167,11 @@ uint32_t expr(char *e, bool *success) {
     uint32_t num;
     int p=0,q=nr_token-1;  //nr_token表示分词的个数
     num=eval(p,q);
-
-    /* TODO: Insert codes to evaluate the expression. */
-    panic("please implement me");
     return num;
 }
 uint32_t  eval(int p,int q)
 {
-    uint32_t count;
+    
     uint32_t op;
     uint32_t val1;
     uint32_t val2;
@@ -188,9 +185,8 @@ uint32_t  eval(int p,int q)
     {
         char *endptr;
         if(tokens[p].type==HEX){
-	    count=(uint32_t)strtol(tokens[p].str,&endptr,16);
-            return count; 
-}
+	return  strtol(tokens[p].str,&endptr,16);
+         }
 
         if(tokens[p].type==NO)
             return  atoi(tokens[p].str);
@@ -225,22 +221,25 @@ uint32_t  eval(int p,int q)
         if(tokens[op].type==NEG)
         {
             val2=eval(op+1,q);
-        }
+        }else
         if(tokens[op].type==DEREF)
-            val2=eval(op+1,q);
+           { val2=eval(op+1,q);}else
         if(tokens[op].type=='!')
-            val2=eval(op+1,q);
+            {val2=eval(op+1,q);}
 
         val1=eval(p,op-1);
         val2=eval(op+1,q);
+
         switch(tokens[op].type)
         {
         case '+':
             return val1+val2;
+		
         case '-':
             return val1-val2;
         case '/':
             return val1/val2;
+		
         case '*':
             return val1*val2;
         case OR:
@@ -252,7 +251,7 @@ uint32_t  eval(int p,int q)
         case '=':
             return val1=val2;
         case UEQ:
-            return val1!=val2;
+          
         case '!':
             return ~val2;
         case NEG:
@@ -260,7 +259,8 @@ uint32_t  eval(int p,int q)
         case DEREF:
             return swaddr_read(val2,4);
         default:
-            return -1;
+           printf("不合法的表达式,在switch case语句中");
+		return 0;
 
 
         }
