@@ -118,13 +118,13 @@ static bool make_token(char *e) {
                 case '-':
                     if(nr_token==0||tokens[nr_token-1].type!=NO){
                         tokens[nr_token].type=NEG;
-			printf("the type has been changed NEG");
+			printf("\nthe type has been changed NEG");
                           }
 			break;
                 case '*':
                     if(nr_token==0||tokens[nr_token-1].type!=NO){
                         tokens[nr_token].type=DEREF;
-			printf("the type has been changed DEREF");
+			printf("\nthe type has been changed DEREF");
 		}
                 
                 }
@@ -161,7 +161,9 @@ uint32_t expr(char *e, bool *success) {
     {
         *success = false;
         return 0;
-    }
+    }else{
+	printf("\nmake token is successful");
+}
     uint32_t num;
     int p=0,q=nr_token-1;  //nr_token表示分词的个数
     num=eval(p,q);
