@@ -295,7 +295,7 @@ bool check_parentheses(int p,int q)
 uint32_t find_op(int p,int q)
 {
     //int fh[32];//运算符
-    int yxj=0; //优先级有七级
+    int yxj=8; //优先级有七级
     //结合性 0表示左结合，1表示右结合
     int pos=p;
     int i,j;
