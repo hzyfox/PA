@@ -217,6 +217,7 @@ uint32_t  eval(int p,int q)
     }
     else
     {
+	printf("kuohao pipei unsuccessful\n");
         op= find_op(p,q);    /*implement find_op(p,q)*/
         if(tokens[op].type==NEG)
         {
