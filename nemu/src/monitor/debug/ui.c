@@ -66,6 +66,22 @@ static int cmd_si(char *args)
 return 0;
 }
 
+static int cmd_x(char *args){
+    char*arg=strtok(NULL," ");
+    int num=atoi(arg);
+    int i;
+    bool success; 
+    uint32_t adress;
+    char*arg1=arg+strlen(arg)+1;
+    
+    adress=expr(arg1,&success);
+    for(i=0;i<num;i++){
+        printf("%x\t",swaddr_read(adress+4*i,4));
+    }
+    return 0;
+
+}
+
 static int cmd_help(char *args);
 
 static struct {
@@ -77,7 +93,8 @@ static struct {
 	{ "c", "Continue the execution of the program", cmd_c },
 	{ "q", "Exit NEMU", cmd_q },
 	{ "si","让程序单步执行N条指令后暂停执行，当N没有给出时，缺省为一",cmd_si},
-	{ "p","求出表达式expr的值",cmd_p}
+	{ "p","求出表达式expr的值",cmd_p},
+	{ "x","求出表达式EXPR的值，将结果作为起始内存地址，并以16进制的形式输出连续的N个4字节",cmd_x},
 
 	/* TODO: Add more commands */
 
