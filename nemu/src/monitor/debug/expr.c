@@ -38,7 +38,7 @@ static struct rule {
     	{"0x[A-Z]*[0-9]*",HEX},
    	{"\\$[a-z]{2,3}",REG},
    	{"/",'/'},
-   	{"\\d+",NO},//certaintype 用于区分×是指针还是称号，或者-是负号还是减号,表示number
+   	{"[0-9]+",NO},//certaintype 用于区分×是指针还是称号，或者-是负号还是减号,表示number
    	{"\\(",LEFT},
    	{"\\)",RIGHT}//grpupp
 };
