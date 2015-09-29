@@ -120,6 +120,7 @@ static bool make_token(char *e) {
                         tokens[nr_token].type=NEG;
 			printf("the type has been changed NEG");
                           }
+			break;
                 case '*':
                     if(nr_token==0||tokens[nr_token-1].type!=NO){
                         tokens[nr_token].type=DEREF;
