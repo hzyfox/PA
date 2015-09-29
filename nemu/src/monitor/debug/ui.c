@@ -94,7 +94,7 @@ static int cmd_w(char*args)
    addr=expr(args,&success);//这里的adress的值需要用求值表达式来算
    temp=new_wp();
   
-   temp->adress=args;
+   strcpy(temp->adress,args);
  
    temp->value=addr;
 
