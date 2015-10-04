@@ -127,6 +127,7 @@ static bool make_token(char *e) {
                         tokens[nr_token].type=DEREF;
 			printf("\nthe type has been changed DEREF\n");
 		}
+			break;
 		case NOTYPE:
 			nr_token--;
                 
