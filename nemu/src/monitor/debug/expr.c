@@ -153,10 +153,7 @@ static bool make_token(char *e) {
             return false;
         }
     }
- for(i=0;i<nr_token;i++){
-	printf("\ntokens[%d]==%s\n",i,tokens[i].str);
-}
-
+ 
 
     return true;
 }
