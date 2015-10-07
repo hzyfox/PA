@@ -106,7 +106,7 @@ static int cmd_info(char*args)
 {
     char*arg=strtok(NULL," ");
     if(!strcmp("r",arg))//print reg
-        printf("eax is %x\t ecx is%x\t \nedx is%x\t ebx is %x\t \nesp is%x\t ebp is %x\t \nesi is%x\t edi is %x\n",cpu.eax,cpu.ecx,cpu.edx,cpu.ebx,cpu.esp,cpu.ebp,
+        printf("eax is %x\t ecx is %x\t \nedx is %x\t ebx is %x\t \nesp is %x\t ebp is %x\t \nesi is %x\t edi is %x\n",cpu.eax,cpu.ecx,cpu.edx,cpu.ebx,cpu.esp,cpu.ebp,
 cpu.esi,cpu.edi);
               
     else if(!strcmp("w",arg))
