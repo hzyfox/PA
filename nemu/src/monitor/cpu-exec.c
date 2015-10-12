@@ -77,7 +77,7 @@ void cpu_exec(volatile uint32_t n) {
 	 	WP*temp=get_head();
 		bool success;
         	for(;temp!=NULL;temp=temp->next){
-                if(temp->value!=swaddr_read(expr(temp->adress,&success),4)){
+                if(temp->value!=expr(temp->adress,&success)){
                 printf("breakpoint %d  %s:%8d has changed to  %8d",temp->NO,temp->adress,temp->value,expr(temp->adress,&success));
                 nemu_state=STOP;
               }

@@ -212,6 +212,8 @@ uint32_t  eval(int p,int q)
                 return cpu.esi;
             if(strcmp(tokens[p].str+1,"edi"))
                 return cpu.edi;
+	   if(strcmp(tokens[p].str+1,"eip"))
+		return cpu.eip;
         }
 
     }
