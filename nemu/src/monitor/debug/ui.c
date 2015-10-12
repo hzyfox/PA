@@ -45,7 +45,7 @@ static int cmd_p(char*args){
 int num;
 bool success;
 num=expr(args,&success);
-printf("%s=%d\n",args,num);
+printf("%s=%x\n",args,num);
 return 0;
 
 }
