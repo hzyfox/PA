@@ -66,7 +66,7 @@ static int cmd_si(char *args)
         if(num==0)
             printf("单步执行命令格式不合法\n");
         else{
-	   printf("执行了%d步 ",num);
+	 
             cpu_exec(num);
 }
     }
