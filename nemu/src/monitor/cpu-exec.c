@@ -78,7 +78,7 @@ void cpu_exec(volatile uint32_t n) {
 		bool success;
         	for(;temp!=NULL;temp=temp->next){
                 if(temp->value!=expr(temp->adress,&success)){
-                printf("breakpoint %d  %s:%8d has changed to  %8d",temp->NO,temp->adress,temp->value,expr(temp->adress,&success));
+                Log("breakpoint %d  %s:%8d has changed to  %8d\n",temp->NO,temp->adress,temp->value,expr(temp->adress,&success));
                 nemu_state=STOP;
               }
 
