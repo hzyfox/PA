@@ -196,23 +196,23 @@ uint32_t  eval(int p,int q)
             return  atoi(tokens[p].str);
         if(tokens[p].type==REG)
         {
-            if(strcmp(tokens[p].str+1,"eax"))
+            if(!strcmp(tokens[p].str+1,"eax"))
                 return cpu.eax;
-            if(strcmp(tokens[p].str+1,"ecx"))
+            if(!strcmp(tokens[p].str+1,"ecx"))
                 return cpu.ecx;
-            if(strcmp(tokens[p].str+1,"edx"))
+            if(!strcmp(tokens[p].str+1,"edx"))
                 return cpu.edx;
-            if(strcmp(tokens[p].str+1,"ebx"))
+            if(!strcmp(tokens[p].str+1,"ebx"))
                 return cpu.ebx;
-            if(strcmp(tokens[p].str+1,"esp"))
+            if(!strcmp(tokens[p].str+1,"esp"))
                 return cpu.esp;
-            if(strcmp(tokens[p].str+1,"ebp"))
+            if(!strcmp(tokens[p].str+1,"ebp"))
                 return cpu.ebp;
-            if(strcmp(tokens[p].str+1,"esi"))
+            if(!strcmp(tokens[p].str+1,"esi"))
                 return cpu.esi;
-            if(strcmp(tokens[p].str+1,"edi"))
+            if(!strcmp(tokens[p].str+1,"edi"))
                 return cpu.edi;
-	   if(strcmp(tokens[p].str+1,"eip"))
+	   if(!strcmp(tokens[p].str+1,"eip"))
 		return cpu.eip;
         }
 
