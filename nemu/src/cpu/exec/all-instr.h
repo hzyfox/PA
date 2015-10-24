@@ -10,6 +10,7 @@
 #include "arith/mul.h"
 #include "arith/idiv.h"
 #include "arith/div.h"
+#include "arith/sub.h"
 
 #include "logic/and.h"
 #include "logic/or.h"
@@ -19,9 +20,14 @@
 #include "logic/shl.h"
 #include "logic/shr.h"
 #include "logic/shrd.h"
+#include "logic/test.h"
+#include "logic/je.h"
+#include "logic/cmp.h"
 
 #include "string/rep.h"
 
 #include "misc/misc.h"
 
 #include "special/special.h"
+
+#include "jump/call.h"
