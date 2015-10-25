@@ -51,6 +51,8 @@ static void do_execute () {
    if((unsigned)(op_dest->val&0xF)<(unsigned)(op_src->val&0xF))
         cpu.AF=1;
 
+ printf("%d, %d",cpu.CF,cpu.ZF);
+
 
 	/* TODO: Update cpuS. */
 
