@@ -3,12 +3,12 @@
 #define instr cmp
 
 static void do_execute () {
-	DATA_TYPE result = op_src->val - op_dest->val;
+	DATA_TYPE result = op_dest->val - op_src->val;
 
 
 	int dest=(int)op_dest->val;
 	int src=(int)op_src->val;
-	int result_flag=src-dest;
+	int result_flag=dest-src;
 	int PF_flag=0;
 
 
