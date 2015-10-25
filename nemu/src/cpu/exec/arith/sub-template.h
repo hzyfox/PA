@@ -29,21 +29,21 @@ static void do_execute () {
     if((unsigned)op_dest->val<(unsigned)op_src->val)
         cpu.CF=1;
 
-    if(result&0b1)
+    if(result&0x01)
         PF_flag++;
-    if(result&0b10)
+    if(result&0x02)
         PF_flag++;
-    if(result&0b100)
+    if(result&0x04)
         PF_flag++;
-    if(result&0b1000)
+    if(result&0x08)
         PF_flag++;
-    if(result&0b10000)
+    if(result&0x10)
         PF_flag++;
-    if(result&0b100000)
+    if(result&0x20)
         PF_flag++;
-    if(result&0b1000000)
+    if(result&0x40)
         PF_flag++;
-    if(result&0b10000000)
+    if(result&0x80)
         PF_flag++;
     if(PF_flag%2==0)
        cpu.PF=1;
@@ -52,7 +52,7 @@ static void do_execute () {
         cpu.AF=1;
 
 
-	/* TODO: Update cpuS. */
+
 
 	print_asm_template2();
 }
