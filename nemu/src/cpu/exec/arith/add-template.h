@@ -20,19 +20,25 @@ static void do_execute () {
 
    if(result==0){
         cpu.ZF=1;
-    }
+    }else cpu.ZF=0;
 
     if((dest>0&&src>0&&result_flag<0)||(dest<0&&src<0&&result_flag>0))
         cpu.OF=1;
+    else cpu.OF=0;
 
     #if DATA_BYTE==1
     if((unsigned)op_dest->val+(unsigned)(op_src->val)>=256)
         cpu.CF=1;
+    else
+        cpu.CF=0;
     #elif DATA_BYTE==2
     if((unsigned)op_dest->val+(unsigned)(op_src->val)>=65536)
         cpu.CF=1;
+    else cpu.CF=0;
     #elif DATA_BYTE==4
     if((unsigned)op_dest->val+(unsigned)(op_src->val)<=4294967296)
+        cpu.CF=1;
+    else cpu.CF=0;
     #endif // DATA_BYTE
 
 
@@ -54,9 +60,11 @@ static void do_execute () {
         PF_flag++;
     if(PF_flag%2==0)
        cpu.PF=1;
+    else cpu.PF=0;
 
    if((unsigned)(op_dest->val&0xF)<(unsigned)((-op_src->val)&0xF))
         cpu.AF=1;
+    else cpu.AF=0;
 
 
 
