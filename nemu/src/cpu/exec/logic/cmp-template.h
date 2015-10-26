@@ -56,7 +56,7 @@ static void do_execute () {
         cpu.AF=1;
   else cpu.AF=0;
 
- printf("%d, %d",cpu.CF,cpu.ZF);
+
 
 
 	/* TODO: Update cpuS. */
