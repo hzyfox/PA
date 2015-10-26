@@ -13,6 +13,7 @@ static void do_execute(){
    #elif DATA_BYTE==4
    cpu.esp-=4;
    MEM_W(cpu.esp,cpu.eip);
+   printf("eip is %x, op_src is %x",cpu.eip,op_src->val);
    cpu.eip+=op_src->val;
    #endif // DATA_BYTE
 
