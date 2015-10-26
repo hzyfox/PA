@@ -13,6 +13,7 @@
 #include "arith/sub.h"
 #include "arith/push.h"
 #include "arith/add.h"
+#include "arith/pop.h"
 
 #include "logic/and.h"
 #include "logic/or.h"
