@@ -52,7 +52,7 @@ union{
         uint32_t panding1:1;
         uint32_t RF:1;
         uint32_t VM:1;
-        uint32_t panding:15;
+        uint32_t panding:14;
     };
 
 };

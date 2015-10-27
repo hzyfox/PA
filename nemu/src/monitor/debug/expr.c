@@ -8,9 +8,14 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <elf.h>
 
+extern char *strtab;
+extern Elf32_Sym *symtab;
+extern  int nr_symtab_entry;
+int  judge_var(int token_flag);
 enum {
-	NOTYPE = 256, EQ,UEQ,AND,OR,HEX,REG,NO,LEFT,RIGHT,NEG,DEREF
+	NOTYPE = 256, EQ,UEQ,AND,OR,HEX,REG,NO,LEFT,RIGHT,NEG,DEREF,VAR
 
 	/* TODO: Add more token types */
 
@@ -41,7 +46,7 @@ static struct rule {
    	{"[0-9]+",NO},//certaintype 用于区分×是指针还是称号，或者-是负号还是减号,表示number
    	{"\\(",LEFT},
    	{"\\)",RIGHT},//grpupp
-   	{"[a-z|0-9|_][a-z|0-9|A-Z|_]+"}
+   	{"[a-z|0-9|_][a-z|0-9|A-Z|_]+",VAR}
 };
 
 #define NR_REGEX (sizeof(rules) / sizeof(rules[0]) )
@@ -217,6 +222,9 @@ uint32_t  eval(int p,int q)
 		return cpu.eip;
         }
 
+       if(tokens[p].type==VAR)
+            return judge_var(p);
+
     }
     else if(check_parentheses(p,q)==true)   /*implement check_parentheses*/
     {
@@ -367,6 +375,20 @@ int judge_yxj(int type,int *yxj,int *pos,int i)
 
 
 }
+int  judge_var(int token_flag)//token_flag represent the position of the var in the array token
+{
+    int i=nr_symtab_entry;
+    for(;i>0;i--){
+
+    if(!strcmp(tokens[token_flag].str,&strtab[symtab[i-1].st_name]))
+        return symtab[i-1].st_value;
+
+    }
+    return -1;
+
+
+}
+
 
 
 
