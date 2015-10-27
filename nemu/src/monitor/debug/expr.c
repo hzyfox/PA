@@ -35,7 +35,7 @@ static struct rule {
     	{"\\|\\|",OR},
     	{"!",'!'},
     	{"=",'='},
-    	{"0x[A-Z]*[0-9]*",HEX},
+    	{"0x[A-Z|0-9|a-z]+",HEX},
    	{"\\$[a-z]{2,3}",REG},
    	{"/",'/'},
    	{"[0-9]+",NO},//certaintype 用于区分×是指针还是称号，或者-是负号还是减号,表示number
@@ -85,7 +85,7 @@ static bool make_token(char *e) {
     regmatch_t pmatch;
 
     nr_token = 0;
-	
+
 
     while(e[position] != '\0')
     {
@@ -102,10 +102,10 @@ static bool make_token(char *e) {
                 tokens[nr_token].type=rules[i].token_type;
                  while(flag<substr_len){
                     tokens[nr_token].str[flag++]=e[position++];
-		  
+
                 }
 		tokens[nr_token].str[flag]='\0';
-               
+
 
 
 
@@ -130,16 +130,16 @@ static bool make_token(char *e) {
 			break;
 		case NOTYPE:
 			nr_token--;
-                
+
                 }
 		nr_token++;
-                
+
 
                 break;
             }
 
         }
-        
+
         if(nr_token==32)
         {
             Log("the expression is beyond  the length");
@@ -148,12 +148,12 @@ static bool make_token(char *e) {
 
         if(i == NR_REGEX)
         {
-	    
+
             printf("no match at position %d\n%s\n%*.s^\n", position, e, position, "");
             return false;
         }
     }
- 
+
 
     return true;
 }
@@ -166,7 +166,7 @@ uint32_t expr(char *e, bool *success) {
         *success = false;
         return 0;
     }else{
-	
+
 }
     uint32_t num;
     int p=0,q=nr_token-1;  //nr_token表示分词的个数
@@ -175,7 +175,7 @@ uint32_t expr(char *e, bool *success) {
 }
 uint32_t  eval(int p,int q)
 {
-    
+
     uint32_t op;
     uint32_t val1=0;
     uint32_t val2=0;
@@ -219,14 +219,14 @@ uint32_t  eval(int p,int q)
     }
     else if(check_parentheses(p,q)==true)   /*implement check_parentheses*/
     {
-	
+
         return eval(p+1,q-1);
     }
     else
     {
-	
+
         op= find_op(p,q);    /*implement find_op(p,q)*/
-	
+
         if(tokens[op].type==NEG||tokens[op].type==DEREF||tokens[op].type=='!')
         {
             val2=eval(op+1,q);}else{
@@ -238,12 +238,12 @@ uint32_t  eval(int p,int q)
         {
         case '+':
             return val1+val2;
-		
+
         case '-':
             return val1-val2;
         case '/':
             return val1/val2;
-		
+
         case '*':
             return val1*val2;
         case OR:
@@ -304,7 +304,7 @@ uint32_t find_op(int p,int q)
     //结合性 0表示左结合，1表示右结合
     int pos=p;
     int i,j;
-   
+
     for(i=p; i<q; i++)
     {
         if(tokens[i].type==LEFT)
@@ -315,7 +315,7 @@ uint32_t find_op(int p,int q)
             i=j+1;
         }
         judge_yxj(tokens[i].type,&yxj,&pos,i);
-       
+
 
 
 

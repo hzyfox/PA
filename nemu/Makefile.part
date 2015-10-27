@@ -1,4 +1,4 @@
-nemu_CFLAGS_EXTRA := -ggdb3 -O2
+﻿nemu_CFLAGS_EXTRA := -ggdb3 -O2
 $(eval $(call make_common_rules,nemu,$(nemu_CFLAGS_EXTRA)))
 
 nemu_LDFLAGS := -lreadline
@@ -7,7 +7,7 @@ $(nemu_BIN): $(nemu_OBJS)
 	$(call make_command, $(CC), $(nemu_LDFLAGS), ld $@, $^)
 	$(call git_commit, "compile NEMU")
 
-PP_FILES := $(filter nemu/srcu/%.c, $(nemu_CFILES))
+PP_FILES := $(filter nemu/src/cpu/%.c, $(nemu_CFILES))
 PP_TARGET := $(PP_FILES:.c=.i)
 
 $(PP_TARGET): %.i: %.c
@@ -16,4 +16,3 @@ cpp:  $(PP_TARGET)
 
 clean-cpp:
 	rm $(PP_TARGET)
-
