@@ -4,6 +4,7 @@
 
 static void do_execute(){
     if(cpu.ZF==1){
+
         #if DATA_BYTE==1
         uint8_t val= (uint8_t)(cpu.eip&0xFF);
         val+=(uint8_t)op_src->val;
@@ -18,6 +19,12 @@ static void do_execute(){
     #endif // DATA_BYTE
 
 
+ /*#if DATA_BYTE==2
+    cpu.eip=(cpu.eip+op_src->val)&0xFFFF;
+    #else
+    cpu.eip+=cpu.eip+(int32_t)op_src->val;
+    #endif // DATA_BYTE
+    */
 
     }
 

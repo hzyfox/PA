@@ -17,11 +17,21 @@ static void do_execute(){
         cpu.eip=cpu.eip+op_src->val;
     #endif // DATA_BYTE
     }
+
+
+
+  /*  #if DATA_BYTE==2
+    cpu.eip=(cpu.eip+op_src->val)&0xFFFF;
+    #else
+    cpu.eip+=cpu.eip+(int32_t)op_src->val;
+    #endif // DATA_BYTE
+
     print_asm_template1();
 
-
+*/
 
 }
+
 
 
 make_instr_helper(i)
