@@ -40,7 +40,8 @@ static struct rule {
    	{"/",'/'},
    	{"[0-9]+",NO},//certaintype 用于区分×是指针还是称号，或者-是负号还是减号,表示number
    	{"\\(",LEFT},
-   	{"\\)",RIGHT}//grpupp
+   	{"\\)",RIGHT},//grpupp
+   	{"[a-z|0-9][a-z|0-9|A-Z]+"}
 };
 
 #define NR_REGEX (sizeof(rules) / sizeof(rules[0]) )
