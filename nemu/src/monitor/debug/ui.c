@@ -54,7 +54,7 @@ static int cmd_si(char *args)
 {
         int num;
 	bool sucess;
-    
+
     if(args==NULL)
     {
         cpu_exec(1);
@@ -62,11 +62,11 @@ static int cmd_si(char *args)
     else
     {
         num=expr(args,&sucess);
-        
+
         if(num==0)
             printf("单步执行命令格式不合法\n");
         else{
-	 
+
             cpu_exec(num);
 }
     }
@@ -77,10 +77,10 @@ static int cmd_x(char *args){
     char*arg=strtok(NULL," ");
     int num=atoi(arg);
     int i;
-    bool success; 
+    bool success;
     uint32_t adress;
     char*arg1=args+strlen(arg)+1;
-    
+
     adress=expr(arg1,&success);
     for(i=0;i<num;i++){
         printf("%x\n",swaddr_read(adress+4*i,4));
@@ -95,9 +95,9 @@ static int cmd_w(char*args)
    bool success;
    addr=expr(args,&success);//这里的adress的值需要用求值表达式来算
    temp=new_wp();
-  
+
    strcpy(temp->adress,args);
- 
+
    temp->value=addr;
 
     return 0;
@@ -110,7 +110,7 @@ static int cmd_info(char*args)
     if(!strcmp("r",arg))//print reg
         printf("eax is %x\t ecx is %x\t \nedx is %x\t ebx is %x\t \nesp is %x\t ebp is %x\t \nesi is %x\t edi is %x\n",cpu.eax,cpu.ecx,cpu.edx,cpu.ebx,cpu.esp,cpu.ebp,
 cpu.esi,cpu.edi);
-              
+
     else if(!strcmp("w",arg))
     {
         WP *p;
@@ -136,7 +136,7 @@ cpu.esi,cpu.edi);
 static int cmd_d(char* args)
 {
 	int num;
-    
+
     num=atoi(args);
     free_wp(num);
     return 0;
@@ -158,10 +158,11 @@ static struct {
 	{ "x","求出表达式EXPR的值，将结果作为起始内存地址，并以16进制的形式输出连续的N个4字节",cmd_x},
         { "w","当表达式EXPR的值发生变化时，暂停程序的执行,设置监视点",cmd_w},
 	{ "d","删除监视点，删除序号为N的监视点",cmd_d},
-        { "info","打印寄存器状态，打印监视点信息",cmd_info}
-       
-	
-        
+        { "info","打印寄存器状态，打印监视点信息",cmd_info},
+        {"bt","打印栈帧链",cmd_bt}
+
+
+
 
 	/* TODO: Add more commands */
 
