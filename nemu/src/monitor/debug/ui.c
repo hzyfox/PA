@@ -6,12 +6,17 @@
 #include <stdlib.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <elf.h>
 
 void cpu_exec(uint32_t);
 
 WP* new_wp();
 void free_wp(int num);
 WP* get_head();
+
+extern char *strtab ;
+ extern Elf32_Sym *symtab;
+ extern int nr_symtab_entry;
 
 
 /* We use the ``readline'' library to provide more flexibility to read from stdin. */
@@ -144,6 +149,7 @@ static int cmd_d(char* args)
 }
 
 static int cmd_help(char *args);
+static int cmd_bt();
 
 static struct {
 	char *name;
@@ -158,14 +164,34 @@ static struct {
 	{ "x","求出表达式EXPR的值，将结果作为起始内存地址，并以16进制的形式输出连续的N个4字节",cmd_x},
         { "w","当表达式EXPR的值发生变化时，暂停程序的执行,设置监视点",cmd_w},
 	{ "d","删除监视点，删除序号为N的监视点",cmd_d},
-        { "info","打印寄存器状态，打印监视点信息",cmd_info}
+        { "info","打印寄存器状态，打印监视点信息",cmd_info},
 
-
+       {"bt","打印栈帧链",cmd_bt}
 
 
 	/* TODO: Add more commands */
 
 };
+
+static int cmd_bt(){
+
+int i=nr_symtab_entry;
+for(;i>0;i--){
+    if(symtab[i-1].st_info==2){
+        printf("函数名是： %s   函数地址是 %d，参数是%d\t %d\t,%d\t,%d\t %d\t",&strtab[symtab[i-1].st_name],symtab[i-1].st_value,
+    swaddr_read(cpu.esp,4),swaddr_read(cpu.esp+4,4),swaddr_read(cpu.esp+8,4),swaddr_read(cpu.esp+12,4),swaddr_read(cpu.esp+16,4));
+
+
+
+    }
+
+
+
+}
+
+return 0;
+
+}
 
 #define NR_CMD (sizeof(cmd_table) / sizeof(cmd_table[0]))
 

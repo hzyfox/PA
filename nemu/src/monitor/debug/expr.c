@@ -378,7 +378,14 @@ int judge_yxj(int type,int *yxj,int *pos,int i)
 int  judge_var(int token_flag)//token_flag represent the position of the var in the array token
 {
     int i=nr_symtab_entry;
-    for(;i>0;i--){
+   // for(i=nr_symtab_entry;i>0;i--)//{
+
+   //printf("%c\t", symtab[i-1].st_info);
+
+
+
+    //printf("\n");
+    for(i=nr_symtab_entry;i>0;i--){
 
     if(!strcmp(tokens[token_flag].str,&strtab[symtab[i-1].st_name]))
         return symtab[i-1].st_value;
