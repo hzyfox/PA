@@ -177,8 +177,8 @@ static int cmd_bt(){
 
 int i=nr_symtab_entry;
 for(;i>0;i--){
-    if(symtab[i-1].st_info==2){
-        printf("函数名是： %s   函数地址是 %d，参数是%d\t %d\t,%d\t,%d\t %d\t",&strtab[symtab[i-1].st_name],symtab[i-1].st_value,
+    if(ELF32_ST_TYPE(symtab[i-1].st_info)==STT_FUNC){
+        printf("函数名是： %s   函数地址是 %d，参数是%d\t %d\t,%d\t,%d\t %d\t\n",&strtab[symtab[i-1].st_name],symtab[i-1].st_value,
     swaddr_read(cpu.esp,4),swaddr_read(cpu.esp+4,4),swaddr_read(cpu.esp+8,4),swaddr_read(cpu.esp+12,4),swaddr_read(cpu.esp+16,4));
 
 
@@ -188,6 +188,8 @@ for(;i>0;i--){
 
 
 }
+if(i==0)
+printf("stack is not exit\n");
 
 return 0;
 
