@@ -12,9 +12,10 @@ static void do_execute(){
     if(result<=0)
         cpu.SF=1;
         else if(result>0)
-        cpu.SF=1;
+        cpu.SF=0;
     if(result==0)
         cpu.ZF=0;
+    else cpu.ZF=0;
 
     if(result&0b1)
         PF_flag++;
@@ -34,6 +35,7 @@ static void do_execute(){
         PF_flag++;
     if(PF_flag%2==0)
        cpu.PF=1;
+    else cpu.PF=0;
 
     print_asm_template2();
 
