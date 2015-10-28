@@ -14,7 +14,7 @@ static void do_execute(){
         else if(result>0)
         cpu.SF=0;
     if(result==0)
-        cpu.ZF=0;
+        cpu.ZF=1;
     else cpu.ZF=0;
 
     if(result&0b1)
