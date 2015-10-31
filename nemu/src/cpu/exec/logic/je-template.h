@@ -3,6 +3,7 @@
 #define instr je
 
 static void do_execute(){
+
     if(cpu.ZF==1){
 
         #if DATA_BYTE==1
@@ -19,17 +20,20 @@ static void do_execute(){
     #endif // DATA_BYTE
 
 
- /*#if DATA_BYTE==2
-    cpu.eip=(cpu.eip+op_src->val)&0xFFFF;
+
+ /*#if DATA_BYTE==1
+    cpu.eip=cpu.eip+(int8_t)(int32_t)op_src->val
+    #elif DATA_BYTE==2
+    cpu.eip=(cpu.eip+(int16_t)(int32_t)op_src->val)&0xFFFF;
     #else
-    cpu.eip+=cpu.eip+(int32_t)op_src->val;
+    cpu.eip=cpu.eip+(int32_t)op_src->val;
     #endif // DATA_BYTE
     */
 
-    }
 
-    print_asm_template1();
+}
 
+print_asm_template1();
 
 
 }
