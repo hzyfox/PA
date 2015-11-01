@@ -8,7 +8,7 @@ typedef int FLOAT;
 static inline int F2int(FLOAT a) {
 	//nemu_assert(0);
        /* we abadon the decimals,means: we just transfer the  part of interger*/
-     if(a&80000000==0)
+     if((a&0x80000000)==0)
 	return (a>>16)&0x7FFF;
      else
 	return -((a>>16)&0x7FFF);
