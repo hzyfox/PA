@@ -2,6 +2,7 @@
 #include "cpu/reg.h"
 #define instr sub
 
+/* DATA_TYPE and DATA_BYTE  is similiar with the dest*/
 static void do_execute () {
     DATA_TYPE result;
 if(op_src->size==1&&(op_dest->size==2||op_dest->size==4)){
