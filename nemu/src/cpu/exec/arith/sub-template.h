@@ -3,7 +3,13 @@
 #define instr sub
 
 static void do_execute () {
-	DATA_TYPE result = op_dest->val - op_src->val;
+    DATA_TYPE result;
+if(op_src->size==1&&(op_dest->size==2||op_dest->size==4)){
+	 result = op_dest->val - (DATA_TYPE_S)op_src->val;
+}
+else
+     result = op_dest->val - op_src->val;
+
 	OPERAND_W(op_dest, result);
 
 	int dest=(int)op_dest->val;
