@@ -4,7 +4,7 @@
 
 static void do_execute(){
 
-    if(cpu.ZF==1){
+    /*if(cpu.ZF==1){
 
         #if DATA_BYTE==1
         uint8_t val= (uint8_t)(cpu.eip&0xFF);
@@ -19,6 +19,8 @@ static void do_execute(){
         cpu.eip=cpu.eip+op_src->val;
     #endif // DATA_BYTE
 
+    */
+
 
 
  /*#if DATA_BYTE==1
@@ -30,8 +32,13 @@ static void do_execute(){
     #endif // DATA_BYTE
     */
 
-
+    if(cpu.ZF==1){
+        cpu.eip+=op_src->val;
+    #if DATA_BYTE==2
+    cpu.eip=cpu.eip&0x0000ffff;
+    #endif // DATA_BYTE
 }
+
 
 print_asm_template1();
 
