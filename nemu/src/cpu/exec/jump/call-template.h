@@ -12,7 +12,7 @@ static void do_execute(){
 
    #else
    cpu.esp-=4;
-   MEM_W(cpu.esp,cpu.eip);
+   MEM_W(cpu.esp,cpu.eip+str_len_flag);
 
    cpu.eip+=op_src->val;
    #endif // DATA_BYTE
