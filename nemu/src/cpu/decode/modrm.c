@@ -1,6 +1,6 @@
 #include "cpu/decode/modrm.h"
 #include "cpu/helper.h"
-extern int str_len_flag;
+
 
 int load_addr(swaddr_t eip, ModR_M *m, Operand *rm) {
 	assert(m->mod != 3);
@@ -80,7 +80,7 @@ int load_addr(swaddr_t eip, ModR_M *m, Operand *rm) {
 
 	rm->type = OP_TYPE_MEM;
 	rm->addr = addr;
-	str_len_flag=instr_len;
+
 
 	return instr_len;
 }
