@@ -5,6 +5,7 @@
 extern int str_len_flag;
 
 static void do_execute(){
+   Log("the str_len is %d",str_len_flag);
 
     #if DATA_BYTE==2
    cpu.esp-=4;
