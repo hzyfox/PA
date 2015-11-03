@@ -5,6 +5,7 @@
 #include "cpu/decode/operand.h"
 
 /* See i386 manual for more details about instruction format. */
+int str_len_flag;
 
 typedef union {
 	struct {
