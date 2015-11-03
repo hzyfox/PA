@@ -7,7 +7,17 @@ static void do_execute () {
 	OPERAND_W(op_dest, result);
 
 	/* TODO: Update EFLAGS. */
-	panic("please implement me");
+	cpu.CF=0;
+    cpu.OF=0;
+    if(result<=0) cpu.SF=1;
+    else cpu.SF=0;
+        if(result==0) cpu.ZF=1;
+        else cpu.ZF=0;
+        if((op_dest->val&0xf)-(op_src->val&0xf)<0) cpu.AF=1;
+        else cpu.AF=0;
+        if(((result&0x80)^(result&0x40)^(result&0x20)^(result&0x10)^(result&0x8)^(result&0x4)^(result&0x2)^(result&0x1))==0)
+        cpu.PF=1;
+        else cpu.PF=0;
 
 	print_asm_template2();
 }
