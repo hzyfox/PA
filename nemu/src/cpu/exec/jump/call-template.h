@@ -4,6 +4,7 @@
 #include "cpu/decode/modrm.h"
 extern int str_len_flag;
 static void do_execute(){
+    printf("the STR_LEN_FLAG is %d",str_len_flag);
     #if DATA_BYTE==2
    cpu.esp-=4;
    MEM_W(cpu.esp,cpu.eip+str_len_flag);
