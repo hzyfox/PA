@@ -6,6 +6,5 @@ $(FLOAT): $(FLOAT_OBJ)
 	ar r $(FLOAT) $(FLOAT_OBJ)
 
 # TODO: write a rule for generating $(FLOAT_OBJ)
-lib-common_CFLAGS_EXTRA := -m32 -O2 -fno-builtin -fno-omit-frame-pointer -fno-stack-protector \
-						-I$(LIB_COMMON_DIR) -I$(NEWLIBC_DIR)/include 
-$(eval $(call make_common_rules,lib-common,$(lib-common_CFLAGS_EXTRA)))
+
+
