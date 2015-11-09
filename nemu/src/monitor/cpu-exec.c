@@ -16,7 +16,7 @@ int exec(swaddr_t);
 WP* get_head();
 char assembly[80];
 char asm_buf[128];
-extern int str_len_flag;
+
 
 /* Used with exception handling. */
 jmp_buf jbuf;
@@ -64,7 +64,7 @@ void cpu_exec(volatile uint32_t n) {
 		int instr_len = exec(cpu.eip);
 
 		cpu.eip += instr_len;
-		str_len_flag=instr_len;
+
 
 
 #ifdef DEBUG
