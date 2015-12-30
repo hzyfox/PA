@@ -4,9 +4,14 @@
 
 char *exec_file = NULL;
 
- char *strtab = NULL;
- Elf32_Sym *symtab = NULL;
- int nr_symtab_entry;
+/*
+static char *strtab = NULL;
+static Elf32_Sym *symtab = NULL;
+static int nr_symtab_entry;
+*/
+char *strtab = NULL;
+Elf32_Sym *symtab = NULL;
+int nr_symtab_entry;
 
 void load_elf_tables(int argc, char *argv[]) {
 	int ret;
@@ -19,8 +24,9 @@ void load_elf_tables(int argc, char *argv[]) {
 	uint8_t buf[4096];
 	/* Read the first 4096 bytes from the exec_file.
 	 * They should contain the ELF header and program headers. */
-	ret = fread(buf, 4096, 1, fp);
-	assert(ret == 1);
+	//ret = fread(buf, 4096, 1, fp);
+	ret = fread(buf, 1, 4096, fp);
+	assert(ret != 0);
 
 	/* The first several bytes contain the ELF header. */
 	Elf32_Ehdr *elf = (void *)buf;
