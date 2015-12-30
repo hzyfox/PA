@@ -19,7 +19,7 @@ uint32_t get_ucr3();
 uint32_t loader() {
 	Elf32_Ehdr *elf;
 	Elf32_Phdr *ph = NULL;
-
+	int i;
 	uint8_t buf[4096];
 
 #ifdef HAS_DEVICE
@@ -36,24 +36,24 @@ uint32_t loader() {
 	nemu_assert(*p_magic == elf_magic);
 
 	/* Load each program segment */
-	ph=(void*)((char*)buf+elf->e_phoff);
-	int i=0;
-	for(i=0; i<elf->e_phnum;i++,ph++ ) {
+	//panic("please implement me");
+
+	ph = (Elf32_Phdr *)(void *)(buf + elf->e_phoff);
+
+	for(i = 0; i < elf->e_phnum; i++, ph++) {
+
 		/* Scan the program header table, load each segment into memory */
 		if(ph->p_type == PT_LOAD) {
-		char*mem=(void*)ph->p_vaddr;
-		ramdisk_read((uint8_t*)mem,ph->p_offset,ph->p_filesz);
-		memset(mem+ph->p_filesz,0,ph->p_memsz-ph->p_filesz);
 
-			/* TODO: read the content of the segment from the ELF file
+			/* TODO: read the content of the segment from the ELF file 
 			 * to the memory region [VirtAddr, VirtAddr + FileSiz)
 			 */
-
-
-			/* TODO: zero the memory region
+			 ramdisk_read((uint8_t *)(ph->p_vaddr), ph->p_offset, ph->p_filesz);
+			 
+			/* TODO: zero the memory region 
 			 * [VirtAddr + FileSiz, VirtAddr + MemSiz)
 			 */
-
+			 memset((void *)(ph->p_vaddr+ph->p_filesz), 0, ph->p_memsz - ph->p_filesz);
 
 #ifdef IA32_PAGE
 			/* Record the program break for future use. */
