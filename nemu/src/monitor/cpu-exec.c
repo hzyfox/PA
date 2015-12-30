@@ -3,6 +3,7 @@
 #include <setjmp.h>
 #include "monitor/watchpoint.h"
 #include "monitor/expr.h"
+
 /* The assembly code of instructions executed is only output to the screen
  * when the number of instructions executed is less than this value.
  * This is useful when you use the ``si'' command.
@@ -13,10 +14,9 @@
 int nemu_state = STOP;
 
 int exec(swaddr_t);
-WP* get_head();
+
 char assembly[80];
 char asm_buf[128];
-
 
 /* Used with exception handling. */
 jmp_buf jbuf;
@@ -65,8 +65,6 @@ void cpu_exec(volatile uint32_t n) {
 
 		cpu.eip += instr_len;
 
-
-
 #ifdef DEBUG
 		print_bin_instr(eip_temp, instr_len);
 		strcat(asm_buf, assembly);
@@ -77,16 +75,26 @@ void cpu_exec(volatile uint32_t n) {
 #endif
 
 		/* TODO: check watchpoints here. */
-	 	WP*temp=get_head();
-		bool success;
-        	for(;temp!=NULL;temp=temp->next){
-                if(temp->value!=expr(temp->adress,&success)){
-                Log("breakpoint %d  %s:%x has changed to  %x\n",temp->NO,temp->adress,temp->value,expr(temp->adress,&success));
-                nemu_state=STOP;
-              }
+		WP *temp = GetHead();
+		uint32_t result;
+		bool flag;
 
-        }
-
+		while(temp)
+		{
+			result = expr(temp->expr, &flag);
+			if(flag == false)
+				return;
+			if(result != temp->result)
+			{
+				nemu_state = STOP;
+				printf("运行过程触发了监视点\n");
+				printf("The watchpoint %d: %s\n", temp->NO, temp->expr);
+				printf("Previous value: result = %u\n", temp->result);
+				printf("Current value: result = %u\n", result);
+				temp->result = result;
+			}
+			temp = temp->next;
+		}
 
 		if(nemu_state != RUNNING) { return; }
 	}

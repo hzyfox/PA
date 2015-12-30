@@ -1,7 +1,6 @@
 #include "cpu/decode/modrm.h"
 #include "cpu/helper.h"
 
-
 int load_addr(swaddr_t eip, ModR_M *m, Operand *rm) {
 	assert(m->mod != 3);
 
@@ -61,13 +60,13 @@ int load_addr(swaddr_t eip, ModR_M *m, Operand *rm) {
 	else { disp_buf[0] = '\0'; }
 
 	if(base_reg == -1) { base_buf[0] = '\0'; }
-	else {
-		sprintf(base_buf, "%%%s", regsl[base_reg]);
+	else { 
+		sprintf(base_buf, "%%%s", regsl[base_reg]); 
 	}
 
 	if(index_reg == -1) { index_buf[0] = '\0'; }
-	else {
-		sprintf(index_buf, ",%%%s,%d", regsl[index_reg], 1 << scale);
+	else { 
+		sprintf(index_buf, ",%%%s,%d", regsl[index_reg], 1 << scale); 
 	}
 
 	if(base_reg == -1 && index_reg == -1) {
@@ -80,7 +79,6 @@ int load_addr(swaddr_t eip, ModR_M *m, Operand *rm) {
 
 	rm->type = OP_TYPE_MEM;
 	rm->addr = addr;
-
 
 	return instr_len;
 }

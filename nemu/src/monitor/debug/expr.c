@@ -1,21 +1,19 @@
- #include "nemu.h"
+#include "nemu.h"
+#include <inttypes.h>
+#include <elf.h>
 
 /* We use the POSIX regex functions to process regular expressions.
  * Type 'man regex' for more information about POSIX regex functions.
  */
 #include <sys/types.h>
 #include <regex.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <elf.h>
 
 extern char *strtab;
 extern Elf32_Sym *symtab;
-extern  int nr_symtab_entry;
-int  judge_var(int token_flag);
+extern int nr_symtab_entry;
+
 enum {
-	NOTYPE = 256, EQ,UEQ,AND,OR,HEX,REG,NO,LEFT,RIGHT,NEG,DEREF,VAR
+	NOTYPE = 256, EQ, NEQ, AND, OR, NOT, HEX, DEC, REG, NEGTIVE, VISIT, LL, LE, RR, RE, VARIABLE
 
 	/* TODO: Add more token types */
 
@@ -32,24 +30,133 @@ static struct rule {
 
 	{" +",	NOTYPE},				// spaces
 	{"\\+", '+'},					// plus
+	{"-",  '-'},					// minus
+	{"\\*", '*'},					// multiply
+	{"/", '/'},						// divide
 	{"==", EQ},						// equal
-	{"-",'-'},
-    	{"\\*",'*'},
-    	{"!=",UEQ},
-    	{"&&",AND},
-    	{"\\|\\|",OR},
-    	{"!",'!'},
-    	{"=",'='},
-    	{"0x[A-Z|0-9|a-z]+",HEX},
-   	{"\\$[a-z]{2,3}",REG},
-   	{"/",'/'},
-   	{"[0-9]+",NO},//certaintype 用于区分×是指针还是称号，或者-是负号还是减号,表示number
-   	{"\\(",LEFT},
-   	{"\\)",RIGHT},//grpupp
-   	{"[a-z|0-9|_][a-z|0-9|A-Z|_]+",VAR}
+	{"!=", NEQ},					// not equal
+	{"<=", LE},						// less or equal
+	{"<", LL},						// less than
+	{">=", RE},						// more or equal
+	{">", RR},						// more than
+	{"\\&{2}", AND},				// logic and
+	{"\\|{2}", OR},					// logic or
+	{"!", NOT},						// not
+	{"\\(", '('},					// left parenthesis
+	{")", ')'},						// right parenthesis
+	{"0x[0-9a-fA-F]+",HEX},			// hexadecimal
+	{"[0-9]+",DEC},					// decimal
+	{"\\$[a-zA-Z]{2,3}",REG},		// register
+	{"[a-zA-Z_]+[0-9a-zA-Z_]+", VARIABLE}	// variable
 };
 
 #define NR_REGEX (sizeof(rules) / sizeof(rules[0]) )
+#define op_num (NR_REGEX-4+3)        //去除 HEX, DEC, REG, NOTYPE, 加上 -(负号), *(取地址), #(辅助使用)
+
+static struct reg_rule{
+	char *name;
+	int subscript;
+	int offset;
+	uint32_t and_num;
+}reg_rules[] = {
+	{"eax", 0, 0, 0xFFFFFFFF},
+	{"ecx", 1, 0, 0xFFFFFFFF},
+	{"edx", 2, 0, 0xFFFFFFFF},
+	{"ebx", 3, 0, 0xFFFFFFFF},
+	{"esp", 4, 0, 0xFFFFFFFF},
+	{"ebp", 5, 0, 0xFFFFFFFF},
+	{"esi", 6, 0, 0xFFFFFFFF},
+	{"edi", 7, 0, 0xFFFFFFFF},
+	{"ax", 0, 0, 0x0000FFFF},
+	{"cx", 1, 0, 0x0000FFFF},
+	{"dx", 2, 0, 0x0000FFFF},
+	{"bx", 3, 0, 0x0000FFFF},
+	{"sp", 4, 0, 0x0000FFFF},
+	{"bp", 5, 0, 0x0000FFFF},
+	{"si", 6, 0, 0x0000FFFF},
+	{"di", 7, 0, 0x0000FFFF},
+	{"ah", 0, 8, 0x000000FF},
+	{"al", 0, 0, 0x000000FF},
+	{"ch", 1, 8, 0x000000FF},
+	{"cl", 1, 0, 0x000000FF},
+	{"dh", 2, 8, 0x000000FF},
+	{"dl", 2, 0, 0x000000FF},
+	{"bh", 3, 8, 0x000000FF},
+	{"bl", 3, 0, 0x000000FF},
+	{"eip",0, 0, 0x00000000}
+};
+int nreg_rule = 25;
+/*
+//'+', '-', '*', '/', AND, OR, NOT, VISIT, NEGTIVE, EQ, NEQ, '(', ')', '#'
+char priority_table[][op_num] = {
+	{'>', '>', '<', '<', '>', '>', '<', '<', '<', '>', '>', '<', '>', '>'},		//'+'
+	{'>', '>', '<', '<', '>', '>', '<', '<', '<', '>', '>', '<', '>', '>'},		//'-'
+	{'>', '>', '>', '>', '>', '>', '<', '<', '<', '>', '>', '<', '>', '>'},		//'*'
+	{'>', '>', '>', '>', '>', '>', '<', '<', '<', '>', '>', '<', '>', '>'},		//'/'
+	{'<', '<', '<', '<', '>', '>', '<', '<', '<', '<', '<', '<', '>', '>'},		//AND
+	{'<', '<', '<', '<', '<', '>', '<', '<', '<', '<', '<', '<', '>', '>'},		//OR
+	{'>', '>', '>', '>', '>', '>', '<', '<', '<', '>', '>', '<', '>', '>'},		//NOT
+	{'>', '>', '>', '>', '>', '>', '<', '<', '<', '>', '>', '<', '>', '>'},		//VISIT
+	{'>', '>', '>', '>', '>', '>', '<', '<', '<', '>', '>', '<', '>', '>'},		//NEGTIVE
+	{'<', '<', '<', '<', '>', '>', '<', '<', '<', '>', '>', '<', '>', '>'},		//EQ
+	{'<', '<', '<', '<', '>', '>', '<', '<', '<', '>', '>', '<', '>', '>'},		//NEQ
+	{'<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '=', '0'},		//'('
+	{'>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '0', '>', '>'},		//')'
+	{'<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '0', '='}		//'#'
+};
+*/
+
+//'+', '-', '*', '/', AND, OR, NOT, VISIT, NEGTIVE, EQ, NEQ, LL, LE, RR, RE, '(', ')', '#'
+char priority_table[][op_num] = {
+	{'>', '>', '<', '<', '>', '>', '<', '<', '<', '>', '>', '>', '>', '>', '>', '<', '>', '>'},		//'+'
+	{'>', '>', '<', '<', '>', '>', '<', '<', '<', '>', '>', '>', '>', '>', '>', '<', '>', '>'},		//'-'
+	{'>', '>', '>', '>', '>', '>', '<', '<', '<', '>', '>', '>', '>', '>', '>', '<', '>', '>'},		//'*'
+	{'>', '>', '>', '>', '>', '>', '<', '<', '<', '>', '>', '>', '>', '>', '>', '<', '>', '>'},		//'/'
+	{'<', '<', '<', '<', '>', '>', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '>', '>'},		//AND
+	{'<', '<', '<', '<', '<', '>', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '>', '>'},		//OR
+	{'>', '>', '>', '>', '>', '>', '<', '<', '<', '>', '>', '>', '>', '>', '>', '<', '>', '>'},		//NOT
+	{'>', '>', '>', '>', '>', '>', '<', '<', '<', '>', '>', '>', '>', '>', '>', '<', '>', '>'},		//VISIT
+	{'>', '>', '>', '>', '>', '>', '<', '<', '<', '>', '>', '>', '>', '>', '>', '<', '>', '>'},		//NEGTIVE
+	{'<', '<', '<', '<', '>', '>', '<', '<', '<', '>', '>', '<', '<', '<', '<', '<', '>', '>'},		//EQ
+	{'<', '<', '<', '<', '>', '>', '<', '<', '<', '>', '>', '<', '<', '<', '<', '<', '>', '>'},		//NEQ
+	{'<', '<', '<', '<', '>', '>', '<', '<', '<', '>', '>', '>', '>', '>', '>', '<', '>', '>'},		//LL
+	{'<', '<', '<', '<', '>', '>', '<', '<', '<', '>', '>', '>', '>', '>', '>', '<', '>', '>'},		//LE
+	{'<', '<', '<', '<', '>', '>', '<', '<', '<', '>', '>', '>', '>', '>', '>', '<', '>', '>'},		//RR
+	{'<', '<', '<', '<', '>', '>', '<', '<', '<', '>', '>', '>', '>', '>', '>', '<', '>', '>'},		//RE
+	{'<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '=', '0'},		//'('
+	{'>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '0', '>', '>'},		//')'
+	{'<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '0', '='}		//'#'
+};
+
+int get_subscript(int op)
+{
+	int n = 0;
+	switch(op)
+	{
+		case '+': n = 0; break;
+		case '-': n = 1; break;
+		case '*': n = 2; break;
+		case '/': n = 3; break;
+		case AND: n = 4; break;
+		case OR: n = 5; break;
+		case NOT: n = 6; break;
+		case VISIT: n = 7; break;
+		case NEGTIVE: n = 8; break;
+		case EQ: n = 9; break;
+		case NEQ: n = 10; break;
+		case LL: n = 11; break;
+		case LE: n = 12; break;
+		case RR: n = 13; break;
+		case RE: n = 14; break;
+		case '(': n = 15; break;
+		case ')': n = 16; break;
+		case '#': n = 17; break;
+		default: break;
+	}
+	return n;
+}
+
+void strdown(char *str);
 
 static regex_t re[NR_REGEX];
 
@@ -74,329 +181,305 @@ typedef struct token {
 	int type;
 	char str[32];
 } Token;
-uint32_t  eval(int p,int q);
-bool check_parentheses(int p,int q);
-uint32_t find_op(int p,int q);
-int judge_yxj(int type,int *yxj,int *pos,int i);
-
 
 Token tokens[32];
 int nr_token;
 
 static bool make_token(char *e) {
 	int position = 0;
-    	int i;
-	int flag;
+	int i;
+	regmatch_t pmatch;
+	
+	nr_token = 0;
 
-    regmatch_t pmatch;
+	while(e[position] != '\0') {
+		/* Try all rules one by one. */
+		for(i = 0; i < NR_REGEX; i ++) {
+			if(regexec(&re[i], e + position, 1, &pmatch, 0) == 0 && pmatch.rm_so == 0) {
+				char *substr_start = e + position;
+				int substr_len = pmatch.rm_eo;
 
-    nr_token = 0;
+				//Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s", i, rules[i].regex, position, substr_len, substr_len, substr_start);
+				position += substr_len;
 
+				/* TODO: Now a new token is recognized with rules[i]. Add codes
+				 * to record the token in the array ``tokens''. For certain 
+				 * types of tokens, some extra actions should be performed.
+				 */
 
-    while(e[position] != '\0')
-    {
-        /* Try all rules one by one. */
-        for(i = 0,flag=0; i < NR_REGEX; i ++)
-        {
-            if(regexec(&re[i], e + position, 1, &pmatch, 0) == 0 && pmatch.rm_so == 0)
-            {
-                char *substr_start = e + position;
-                int substr_len = pmatch.rm_eo;
+				switch(rules[i].token_type) {
+					case '+':
+						if(nr_token == 0 || !(tokens[nr_token-1].type == DEC || tokens[nr_token-1].type == HEX || tokens[nr_token-1].type == REG
+								|| tokens[nr_token-1].type == VARIABLE || tokens[nr_token-1].type == ')'))
+							//tokens[nr_token].type = POSITIVE;
+							break;
+						else{
+							tokens[nr_token].type = '+';
+							strcpy(tokens[nr_token].str, "+");
+							nr_token++;
+							break;
+						}
+					case '-':
+						if(nr_token == 0 || !(tokens[nr_token-1].type == DEC || tokens[nr_token-1].type == HEX || tokens[nr_token-1].type == REG
+								|| tokens[nr_token-1].type == VARIABLE || tokens[nr_token-1].type == ')'))
+                            tokens[nr_token].type = NEGTIVE; 
+						else{ 
+							tokens[nr_token].type = '-';	
+                            strcpy(tokens[nr_token].str, "-"); 
+				        }	
+				        nr_token++; 
+					    break;       
+					case '*':
+						if(nr_token == 0 || !(tokens[nr_token-1].type == DEC || tokens[nr_token-1].type == HEX || tokens[nr_token-1].type == REG
+								|| tokens[nr_token-1].type == VARIABLE || tokens[nr_token-1].type == ')'))
+							tokens[nr_token].type = VISIT;
+						else{
+							tokens[nr_token].type = '*';
+							strcpy(tokens[nr_token].str, "*");
+						}
+						nr_token++;
+						break;
+					case '/': case '(': case ')': case EQ: case NEQ: case LL: case LE: case RR: case RE: 
+					case AND: case OR: case NOT: case HEX: case DEC: case VARIABLE:
+						tokens[nr_token].type = rules[i].token_type;
+						strncpy(tokens[nr_token].str, substr_start, substr_len);
+						*(tokens[nr_token].str+substr_len) = '\0';
+						nr_token++;
+						break;
+					case REG:
+						tokens[nr_token].type = REG;
+						strncpy(tokens[nr_token].str, substr_start+1, substr_len-1);
+						*(tokens[nr_token].str + substr_len-1) = '\0';
+						strdown(tokens[nr_token].str);
+						nr_token++;
+						break;
+					case NOTYPE:
+						break;
+					default: panic("please implement me");
+				}//switch
+				break;
+			}//if
+		}//for
 
-                Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s", i, rules[i].regex, position, substr_len, substr_len, substr_start);
-
-                tokens[nr_token].type=rules[i].token_type;
-                 while(flag<substr_len){
-                    tokens[nr_token].str[flag++]=e[position++];
-
-                }
-		tokens[nr_token].str[flag]='\0';
-
-
-
-
-                /* TODO: Now a new token is recognized with rules[i]. Add codes
-                 * to record the token in the array ``tokens''. For certain
-                 * types of tokens, some extra actions should be performed.
-                 */
-
-                switch(tokens[nr_token].type)
-                {
-                case '-':
-                    if(nr_token==0||(tokens[nr_token-1].type!=NO&&tokens[nr_token-1].type!=RIGHT)){
-                        tokens[nr_token].type=NEG;
-			printf("\nthe type has been changed NEG\n");
-                          }
-			break;
-                case '*':
-                    if(nr_token==0||(tokens[nr_token-1].type!=NO&&tokens[nr_token-1].type!=RIGHT)){
-                        tokens[nr_token].type=DEREF;
-			printf("\nthe type has been changed DEREF\n");
+		if(i == NR_REGEX) {
+			printf("no match at position %d\n%s\n%*.s^\n", position, e, position, "");
+			return false;
 		}
-			break;
-		case NOTYPE:
-			nr_token--;
+	}//while
+	
+	/*
+	int num;
+	for(num = 0; num<nr_token; num++)
+	{
+		printf("%s\n", tokens[num].str);
+	}
+	*/
 
-                }
-		nr_token++;
-
-
-                break;
-            }
-
-        }
-
-        if(nr_token==32)
-        {
-            Log("the expression is beyond  the length");
-            return false;
-        }
-
-        if(i == NR_REGEX)
-        {
-
-            printf("no match at position %d\n%s\n%*.s^\n", position, e, position, "");
-            return false;
-        }
-    }
-
-
-    return true;
+	return true; 
 }
 
+//比较栈顶运算符和待入栈运算符的优先级，op1为栈顶运算符，op2为待入栈运算符
+char compare(int op1, int op2){
+	return priority_table[get_subscript(op1)][get_subscript(op2)];
+}
 
+void strdown(char *str)
+{
+	if(str == NULL)
+		return;
+	int i = 0;
+	while(str[i] != '\0'){
+		if(str[i] >= 'A' && str[i] <= 'Z')
+			str[i] += 'a' - 'A';
+		i++;
+	}
+}
+
+int64_t reg_fetch(int j){
+	if(j == nreg_rule-1)
+		return (int64_t)cpu.eip;
+	else
+		return (int64_t)((cpu.gpr[reg_rules[j].subscript]._32 >> reg_rules[j].offset) & reg_rules[j].and_num);
+}
 
 uint32_t expr(char *e, bool *success) {
-	 if(!make_token(e))
-    {
-        *success = false;
-        return 0;
-    }else{
-
-}
-    uint32_t num;
-    int p=0,q=nr_token-1;  //nr_token表示分词的个数
-    num=eval(p,q);
-    return num;
-}
-uint32_t  eval(int p,int q)
-{
-
-    uint32_t op;
-    uint32_t val1=0;
-    uint32_t val2=0;
-    if(p>q)
-    {
-        printf("the bad expression\n");
-        assert(0);
-
-    }
-    else if(p==q)
-    {
-        char *endptr;
-        if(tokens[p].type==HEX){
-	return  strtol(tokens[p].str,&endptr,16);
-         }
-
-        if(tokens[p].type==NO)
-            return  atoi(tokens[p].str);
-        if(tokens[p].type==REG)
-        {
-            if(!strcmp(tokens[p].str+1,"eax"))
-                return cpu.eax;
-            if(!strcmp(tokens[p].str+1,"ecx"))
-                return cpu.ecx;
-            if(!strcmp(tokens[p].str+1,"edx"))
-                return cpu.edx;
-            if(!strcmp(tokens[p].str+1,"ebx"))
-                return cpu.ebx;
-            if(!strcmp(tokens[p].str+1,"esp"))
-                return cpu.esp;
-            if(!strcmp(tokens[p].str+1,"ebp"))
-                return cpu.ebp;
-            if(!strcmp(tokens[p].str+1,"esi"))
-                return cpu.esi;
-            if(!strcmp(tokens[p].str+1,"edi"))
-                return cpu.edi;
-	   if(!strcmp(tokens[p].str+1,"eip"))
-		return cpu.eip;
-        }
-
-       if(tokens[p].type==VAR)
-            return judge_var(p);
-
-    }
-    else if(check_parentheses(p,q)==true)   /*implement check_parentheses*/
-    {
-
-        return eval(p+1,q-1);
-    }
-    else
-    {
-
-        op= find_op(p,q);    /*implement find_op(p,q)*/
-
-        if(tokens[op].type==NEG||tokens[op].type==DEREF||tokens[op].type=='!')
-        {
-            val2=eval(op+1,q);}else{
-
-        val1=eval(p,op-1);
-        val2=eval(op+1,q);}
-
-        switch(tokens[op].type)
-        {
-        case '+':
-            return val1+val2;
-
-        case '-':
-            return val1-val2;
-        case '/':
-            return val1/val2;
-
-        case '*':
-            return val1*val2;
-        case OR:
-            return val1||val2;
-        case AND:
-            return val1&&val2;
-        case EQ:
-            return val1==val2;
-        case '=':
-            return val1=val2;
-        case UEQ:
-            return val1!=val2;
-        case '!':
-            return !val2;
-        case NEG:
-            return -val2;
-        case DEREF:
-            return swaddr_read(val2,4);
-        default:
-           printf("不合法的表达式,在switch case语句中");
+	if(!make_token(e)) {
+		*success = false;
 		return 0;
-        }
+	}
+	
+	int64_t num_stack[16];
+	Token op_stack[16];
+	Token flag = {'#', "#"};
+	int i = 0, j = 0;
+	int type;
+	tokens[nr_token] = flag;
+	op_stack[0] = flag;
+	int s1 = 0, s2 = 1;
+    int64_t  op1, op2;
 
-
-
-    }
-	return 0;
-
+	while((tokens[i].type != '#' || op_stack[s2-1].type != '#') && s1>=0 && s2>=1)
+	{
+		switch(tokens[i].type)
+		{
+			case DEC:
+				//sscanf(tokens[i].str, "%"SCNu32"" , &op1);
+				sscanf(tokens[i].str, "%"SCNd64"" , &op1);
+				num_stack[s1++] = op1;
+				i++;
+				break;
+			case HEX:
+				//sscanf(tokens[i].str, "0x%"SCNx32"", &op1);
+				sscanf(tokens[i].str, "0x%"SCNx64"", &op1);
+				num_stack[s1++] = op1;
+				i++;
+				break;
+			case REG:
+				op1 = 0;
+				for(j = 0; j < nreg_rule; j++)
+				{
+					if(strcmp(tokens[i].str, reg_rules[j].name) == 0){
+						op1 = reg_fetch(j);
+						break;
+					}
+				}
+				if(j == nreg_rule)
+				{
+					printf("表达式中出现了不合法的寄存器名!!!\n");
+					*success = false;
+					return 0;	
+				}
+				num_stack[s1++] = op1;
+				i++;
+				break;
+			case VARIABLE:
+				//printf("Symtab_entry:%d\n", nr_symtab_entry);
+				for(j = 0; j < nr_symtab_entry; j++){
+					//printf("symtab[%d].st_info: %d\t%s\n", j, symtab[j].st_info, strtab+symtab[j].st_name);
+					//if(symtab[j].st_info == 17){
+					if(ELF32_ST_TYPE(symtab[j].st_info) == STT_OBJECT){
+						if(strcmp(tokens[i].str, strtab+symtab[j].st_name) == 0){
+							op1 = symtab[j].st_value;
+							break;
+						}
+					}
+				}	
+				if(j == nr_symtab_entry){
+					printf("表达式中出现了不合法的变量名!!!\n");
+					*success = false;
+					return 0;	
+				}
+				num_stack[s1++] = op1;
+				i++;
+				break;
+			default:
+				switch(compare(op_stack[s2-1].type, tokens[i].type))
+				{
+					case '<':
+						op_stack[s2++] = tokens[i];
+						i++;
+						break;
+					case '=':
+						s2--;
+						i++;
+						break;
+					case '>':
+						//int type;
+						type = op_stack[--s2].type;
+						switch(type){
+							case '+':
+								op2 = num_stack[--s1];
+								op1 = num_stack[--s1];
+							   	num_stack[s1++] = op1 + op2; 
+								break;
+							case '-':
+								op2 = num_stack[--s1];
+								op1 = num_stack[--s1];
+							   	num_stack[s1++] = op1 - op2; 
+								break;
+							case '*':
+								op2 = num_stack[--s1];
+								op1 = num_stack[--s1];
+							   	num_stack[s1++] = op1*op2; 
+								break;
+							case '/': 
+								op2 = num_stack[--s1];
+								op1 = num_stack[--s1];
+								num_stack[s1++] = op1/op2; 
+								break;
+							case AND:
+								op2 = num_stack[--s1];
+								op1 = num_stack[--s1];
+								num_stack[s1++] = (op1 && op2);
+								break;
+							case OR:
+								op2 = num_stack[--s1];
+								op1 = num_stack[--s1];
+								num_stack[s1++] = (op1 || op2);
+								break;
+							case NOT:								
+								op1 = num_stack[--s1];
+								num_stack[s1++] = (!op1);
+								break;
+							case VISIT:
+								op1 = num_stack[--s1];
+								num_stack[s1++] = swaddr_read(op1,4);
+								break;
+							case NEGTIVE:
+								op1 = num_stack[--s1];
+								num_stack[s1++] = -op1;
+								break;
+							case EQ:
+								op2 = num_stack[--s1];
+								op1 = num_stack[--s1];
+								num_stack[s1++] = (op1 == op2); 
+								break;
+							case NEQ:
+								op2 = num_stack[--s1];
+								op1 = num_stack[--s1];
+								num_stack[s1++] = (op1 != op2); 
+								break;
+							case LL:
+								op2 = num_stack[--s1];
+								op1 = num_stack[--s1];
+								num_stack[s1++] = (op1 < op2); 
+								break;
+							case LE:
+								op2 = num_stack[--s1];
+								op1 = num_stack[--s1];
+								num_stack[s1++] = (op1 <= op2); 
+								break;
+							case RR:
+								op2 = num_stack[--s1];
+								op1 = num_stack[--s1];
+								num_stack[s1++] = (op1 > op2); 
+								break;
+							case RE:
+								op2 = num_stack[--s1];
+								op1 = num_stack[--s1];
+								num_stack[s1++] = (op1 >= op2); 
+								break;
+							default:
+								break;
+						}
+						break;
+					default:
+						break;
+				}
+				break;
+		}//switch
+	}//while
+	if(s1 == 1 && s2 == 1){
+		*success = true;
+		return (uint32_t)num_stack[--s1];
+	}
+	else
+	{
+		*success = false;
+		return 0;
+	}
+	/* TODO: Insert codes to evaluate the expression. */
+	//panic("please implement me");
+	//return 0;
 }
-bool check_parentheses(int p,int q)
-{
-    if(tokens[p].type!=LEFT||tokens[q].type!=RIGHT)
-    {
-        return false;
-    }
-    char s[32];
-    int i,flag=0;
-    for(i=p+1; i<q; i++)
-    {
-        if(tokens[i].type==LEFT)
-            s[flag++]='(';
-        if(tokens[i].type==RIGHT&&s[flag-1]=='(')
-        {
-            flag=flag-1;
-        }
-    }
-    if(flag>0)
-        return false;
-    else
-        return true;
-    return true;
-}
-
-uint32_t find_op(int p,int q)
-{
-    //int fh[32];//运算符
-    int yxj=8; //优先级有七级
-    //结合性 0表示左结合，1表示右结合
-    int pos=p;
-    int i,j;
-
-    for(i=p; i<q; i++)
-    {
-        if(tokens[i].type==LEFT)
-        {
-            j=i+1;
-              while(check_parentheses(i,j)!=true)
-                  j++;
-            i=j+1;
-        }
-        judge_yxj(tokens[i].type,&yxj,&pos,i);
-
-
-
-
-    }
-    return pos;
-
-}
-int judge_yxj(int type,int *yxj,int *pos,int i)
-{
-    if((type==NEG||type=='!'||type==DEREF)&&*yxj>7)
-    {
-        *yxj=7;
-        *pos=i;
-    }
-    else if((type=='*'||type=='/')&&*yxj>=6)
-    {
-        *yxj=6;
-        *pos=i;
-    }
-    else if((type=='+'||type=='-')&&*yxj>=5)
-    {
-        *yxj=5;
-        *pos=i;
-    }
-    else if((type==EQ||type==UEQ)&&*yxj>=4)
-    {
-        *yxj=4;
-        *pos=i;
-    }
-    else if(type==AND&&*yxj>=3)
-    {
-        *yxj=3;
-        *pos=i;
-    }
-    else if(type==OR&&*yxj>=2)
-    {
-        *yxj=2;
-        *pos=i;
-    }
-    else if(type=='='&&*yxj>=1)
-    {
-        *yxj=1;
-        *pos=i;
-    }
-    else return 0;
-
-    return 1;
-
-
-}
-int  judge_var(int token_flag)//token_flag represent the position of the var in the array token
-{
-    int i=nr_symtab_entry;
-   // for(i=nr_symtab_entry;i>0;i--)//{
-
-   //printf("%c\t", symtab[i-1].st_info);
-
-
-
-    //printf("\n");
-    for(i=nr_symtab_entry;i>0;i--){
-
-    if(!strcmp(tokens[token_flag].str,&strtab[symtab[i-1].st_name]))
-        return symtab[i-1].st_value;
-
-    }
-    return -1;
-
-
-}
-
-
-
-
 

@@ -4,22 +4,23 @@
 
 static void do_execute () {
 	DATA_TYPE result = op_dest->val & op_src->val;
-	OPERAND_W(op_dest, result);
 
 	/* TODO: Update EFLAGS. */
-	cpu.CF=0;
-    cpu.OF=0;
-    if(result<=0) cpu.SF=1;
-    else cpu.SF=0;
-        if(result==0) cpu.ZF=1;
-        else cpu.ZF=0;
-        if((op_dest->val&0xf)-(op_src->val&0xf)<0) cpu.AF=1;
-        else cpu.AF=0;
-        if(((result&0x80)^(result&0x40)^(result&0x20)^(result&0x10)^(result&0x8)^(result&0x4)^(result&0x2)^(result&0x1))==0)
-        cpu.PF=1;
-        else cpu.PF=0;
+	//panic("please implement me");
+	//set EFLAGS's value
+	cpu.ZF = result ? 0 : 1;
+	cpu.CF = 0;
+	cpu.OF = 0;
+	
+	uint8_t low_b = result & 0xff;
+	cpu.PF = !((low_b & 0x01)^(low_b>>1 & 0x01)^(low_b>>2 & 0x01)^(low_b>>3 & 0x01)^(low_b>>4 & 0x01)^(low_b>>5 & 0x01)^(low_b>>6 & 0x01)^(low_b>>7 & 0x01));
+
+	cpu.SF = MSB(result);
+	
+	OPERAND_W(op_dest, result);
 
 	print_asm_template2();
+
 }
 
 make_instr_helper(i2a)

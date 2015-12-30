@@ -6,7 +6,6 @@
 
 /* See i386 manual for more details about instruction format. */
 
-
 typedef union {
 	struct {
 		uint8_t R_M		:3;
