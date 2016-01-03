@@ -13,7 +13,7 @@
 extern char *strtab;
 extern Elf32_Sym *symtab;
 extern  int nr_symtab_entry;
-int  judge_var(int token_flag);
+int  judge_var(int token_flag); 
 enum {
 	NOTYPE = 256, EQ,UEQ,AND,OR,HEX,REG,NO,LEFT,RIGHT,NEG,DEREF,VAR
 
